@@ -1,0 +1,341 @@
+<html>
+<head>
+<title>Beahs bday</title>
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Special+Elite&display=swap" rel="stylesheet">
+<style>
+ body {
+background-image: url('surprise.jpeg');
+background-size: cover;
+background-repeat: repeat;
+background-position: center;
+font-family: 'Special Elite', monospace;
+color: #4f5f2a;
+}
+#btn {
+  position: absolute;
+  top: 400px;
+  left: 550px;
+}
+  .box {
+    display: none;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 78%;
+    max-width: 440px;
+    transform: translate(-50%, -50%);
+    background: #fbf6ec;
+    border: 3px double #8fa35a;
+    padding: 26px;
+    text-align: center;
+    font-size: 19px;
+    line-height: 1.5;
+    animation: pop 0.4s;
+    z-index: 500;
+  }
+  @keyframes pop {
+    from { opacity: 0; transform: translate(-50%, -46%); }
+    to { opacity: 1; transform: translate(-50%, -50%); }
+  }
+  .script { font-family: 'Great Vibes', cursive; font-size: 30px; line-height: 1.3; }
+
+  .small {
+    background: #8fa35a;
+    color: #fbf6ec;
+    font-family: 'Special Elite', monospace;
+    font-size: 17px;
+    border: none;
+    border-radius: 14px;
+    padding: 8px 16px;
+    margin: 5px;
+  }
+
+  /* ----- the flipbook ----- */
+  #album { display: none; }
+  #stage {
+    position: absolute;
+    top: 46%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+  #book {
+    position: relative;
+    width: min(94vw, 840px, 111vh);
+    aspect-ratio: 3 / 2;
+    perspective: 2200px;
+    transition: transform 0.6s;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  .leaf {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 50%;
+    height: 100%;
+    transform-origin: left center;
+    transform-style: preserve-3d;
+    transition: transform 0.9s;
+  }
+  .leaf.flipped { transform: rotateY(-180deg); }
+  .face {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #fbf6ec;
+    overflow: hidden;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    box-shadow: 0 4px 14px rgba(50, 60, 20, 0.35);
+  }
+  .face.back { transform: rotateY(180deg); }
+  .face img.pic {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    -webkit-user-drag: none;
+    pointer-events: none;
+  }
+  /* soft shadow near the spine so it looks like a real book */
+  .face::after {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none;
+  }
+  .face.front::after { background: linear-gradient(to right, rgba(0,0,0,0.22), transparent 10%); }
+  .face.back::after { background: linear-gradient(to left, rgba(0,0,0,0.22), transparent 10%); }
+
+  .heart {
+    position: absolute;
+    width: 38px;
+    padding: 6px;
+    cursor: pointer;
+    z-index: 5;
+    transition: opacity 0.4s, filter 0.4s;
+  }
+  .heart.found { opacity: 0.3; filter: grayscale(1); pointer-events: none; }
+  .heart.hint { filter: drop-shadow(0 0 8px #f06c98); }
+
+  #controls {
+    position: absolute;
+    bottom: 2%;
+    width: 100%;
+    text-align: center;
+    font-size: 17px;
+    z-index: 400;
+  }
+  #controls span {
+    background: #fbf6ec;
+    padding: 6px 12px;
+    border-radius: 14px;
+  }
+</style>
+</head>
+<body>
+<img id="btn" src="greenbutton.png" width="300" onclick="showIntro()">
+<div id="intro" class="box">
+  <p class="script">There are 6 little hearts hiding inside this book.</p>
+  <p>Find them all to unlock a surprise.</p>
+  <button class="small" onclick="startAlbum()">Continue</button>
+</div>
+
+<div id="album">
+  <div id="stage"><div id="book"></div></div>
+  <div id="controls">
+    <button class="small" onclick="goTo(turned - 1)">Back</button>
+    <span id="count"></span>
+    <button class="small" onclick="goTo(turned + 1)">Next</button><br>
+    <button class="small" onclick="giveHint()">Hint</button>
+    <button class="small" onclick="closeAlbum()">Close</button>
+  </div>
+</div>
+
+<div id="card" class="box">
+  <p id="reason" class="script"></p>
+  <button class="small" onclick="closeCard()">Keep looking</button>
+</div>
+<script>
+var heartPic = "heart.png";
+
+// Your page images in order. The first is the front cover, the last is the
+// back cover. Use an EVEN number of images. Best size: 1200 x 1600 pixels.
+var pageImgs = [
+  "coverpage.jpeg",
+  "beah1.jpeg", "beah2.jpeg", "beah3.jpeg", "beah4.jpeg",
+  "page5.jpg", "page6.jpg", "page7.jpg", "page8.jpg",
+  "back.jpg"
+];
+
+// page = the number in the list above (0 is the cover, 1 is page1.jpg, ...)
+// x and y = position on that page in percent
+var hearts = [
+  { page: 1, x: 80, y: 10, text: "Reason 1: change me" },
+  { page: 2, x: 8,  y: 60, text: "Reason 2: change me" },
+  { page: 4, x: 82, y: 82, text: "Reason 3: change me" },
+  { page: 5, x: 10, y: 12, text: "Reason 4: change me" },
+  { page: 7, x: 75, y: 45, text: "Reason 5: change me" },
+  { page: 8, x: 45, y: 85, text: "Reason 6: change me" }
+];
+
+var finalMessage = "CHANGE THIS: your final birthday message. Love, YOUR NAME";
+// ---- END OF EDIT PART ----
+
+var turned = 0;      // how many leaves are flipped
+var found = 0;
+var finished = false;
+var built = false;
+var leafEls = [];
+var totalLeaves = Math.ceil(pageImgs.length / 2);
+var book = document.getElementById("book");
+
+function showIntro() {
+  document.getElementById("btn").style.display = "none";
+  document.getElementById("intro").style.display = "block";
+}
+
+function startAlbum() {
+  document.getElementById("intro").style.display = "none";
+  document.getElementById("album").style.display = "block";
+  if (!built) { buildBook(); built = true; }
+  updateBook();
+}
+
+function closeAlbum() {
+  document.getElementById("album").style.display = "none";
+  document.getElementById("btn").style.display = "block";
+}
+
+function makeFace(idx, cls) {
+  var f = document.createElement("div");
+  f.className = "face " + cls;
+  if (idx < pageImgs.length) {
+    var im = document.createElement("img");
+    im.className = "pic";
+    im.src = pageImgs[idx];
+    f.appendChild(im);
+    for (var i = 0; i < hearts.length; i++) {
+      if (hearts[i].page == idx) {
+        var h = document.createElement("img");
+        h.src = heartPic;
+        h.className = "heart";
+        h.style.left = hearts[i].x + "%";
+        h.style.top = hearts[i].y + "%";
+        h.setAttribute("data-i", i);
+        h.onclick = function () { openHeart(this); };
+        f.appendChild(h);
+      }
+    }
+  }
+  return f;
+}
+
+function buildBook() {
+  for (var k = 0; k < totalLeaves; k++) {
+    var leaf = document.createElement("div");
+    leaf.className = "leaf";
+    leaf.appendChild(makeFace(2 * k, "front"));
+    leaf.appendChild(makeFace(2 * k + 1, "back"));
+    book.appendChild(leaf);
+    leafEls.push(leaf);
+  }
+  document.getElementById("count").innerHTML = "Hearts 0 / " + hearts.length;
+}
+
+function updateBook() {
+  for (var k = 0; k < totalLeaves; k++) {
+    var l = leafEls[k];
+    l.style.transition = "";
+    l.style.transform = "";
+    if (k < turned) { l.classList.add("flipped"); } else { l.classList.remove("flipped"); }
+    l.style.zIndex = (k < turned) ? k : (totalLeaves - k);
+  }
+  // center the cover when closed, center the back cover at the end
+  var shift = 0;
+  if (turned == 0) { shift = -25; }
+  if (turned == totalLeaves) { shift = 25; }
+  book.style.transform = "translateX(" + shift + "%)";
+}
+
+function goTo(n) {
+  if (n < 0 || n > totalLeaves) { return; }
+  turned = n;
+  updateBook();
+}
+
+// ----- drag to flip -----
+var drag = null;
+
+book.addEventListener("pointerdown", function (e) {
+  if (e.target.classList.contains("heart")) { return; }
+  var r = book.getBoundingClientRect();
+  var onRight = e.clientX > r.left + r.width / 2;
+  var k = onRight ? turned : turned - 1;
+  if (k < 0 || k >= totalLeaves) { return; }
+  drag = { k: k, startX: e.clientX, w: r.width / 2, next: onRight, prog: onRight ? 0 : 1 };
+  book.setPointerCapture(e.pointerId);
+});
+
+book.addEventListener("pointermove", function (e) {
+  if (!drag) { return; }
+  var dx = e.clientX - drag.startX;
+  var p;
+  if (drag.next) {
+    p = -dx / (drag.w * 1.2);
+  } else {
+    p = 1 - dx / (drag.w * 1.2);
+  }
+  drag.prog = Math.max(0, Math.min(1, p));
+  var l = leafEls[drag.k];
+  l.style.transition = "none";
+  l.style.zIndex = 100;
+  l.style.transform = "rotateY(" + (-180 * drag.prog) + "deg)";
+});
+
+function endDrag() {
+  if (!drag) { return; }
+  if (drag.next && drag.prog > 0.3) { turned = drag.k + 1; }
+  if (!drag.next && drag.prog < 0.7) { turned = drag.k; }
+  drag = null;
+  updateBook();
+}
+book.addEventListener("pointerup", endDrag);
+book.addEventListener("pointercancel", endDrag);
+
+// ----- hearts -----
+function openHeart(el) {
+  var i = el.getAttribute("data-i");
+  el.classList.add("found");
+  found = found + 1;
+  document.getElementById("count").innerHTML = "Hearts " + found + " / " + hearts.length;
+  document.getElementById("reason").innerHTML = hearts[i].text;
+  document.getElementById("card").style.display = "block";
+}
+
+function closeCard() {
+  document.getElementById("card").style.display = "none";
+  if (found == hearts.length && !finished) {
+    finished = true;
+    document.getElementById("reason").innerHTML = finalMessage;
+    document.getElementById("card").style.display = "block";
+  }
+}
+
+function giveHint() {
+  var all = document.getElementsByClassName("heart");
+  for (var i = 0; i < all.length; i++) {
+    all[i].classList.add("hint");
+  }
+  setTimeout(function () {
+    for (var i = 0; i < all.length; i++) {
+      all[i].classList.remove("hint");
+    }
+  }, 1500);
+}
+</script>
+</body>
+</html>
