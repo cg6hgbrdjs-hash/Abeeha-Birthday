@@ -13,8 +13,8 @@ color: #4f5f2a;
 }
 #btn {
   position: absolute;
-  top: 400px;
-  left: 550px;
+  top: 300px;
+  left: 500px;
 }
   .box {
     display: none;
@@ -168,17 +168,17 @@ var pageImgs = [
 ];
 
 var hearts = [
-  { page: 1, x: 80, y: 10, text: "Reason 1: change me" },
-  { page: 2, x: 8,  y: 60, text: "Reason 2: change me" },
+  { page: 1, x: 80, y: 10, text: "I love you so much" },
+  { page: 2, x: 8,  y: 60, text: "omg your so close" },
   { page: 4, x: 82, y: 82, text: "Reason 3: change me" },
   { page: 5, x: 10, y: 12, text: "Reason 4: change me" },
   { page: 7, x: 75, y: 45, text: "Reason 5: change me" },
   { page: 8, x: 45, y: 85, text: "Reason 6: change me" }
 ];
 
-var finalMessage = "CHANGE THIS: your final birthday message. Love, YOUR NAME";
+var finalMessage = "hey beahhhhh,happy birthday. Heads up you know im bad with letters but i tried anyways omg you've gotten so big i cant believe my little sisters this big. Your almost as tall as meee You used to tell us to wash your butt now you can do that yourself, im so proud of youu, Lmao jokes aside, abeeha i can't tell you how much you mean to me. your always there for me as a sister and i could never ask for anyone else but you to be my sister inanother universe. if i could, i'd wish that you were my biological sister but sadly your an ex monkey but thats exactly why i love you so much. Your jokes lights my day up (yes even the tati one, especially them), whenever i feel down i know your hug can fix it. youve grown to be an amazing, the kindest, the most honest and womderful young lady.";
 
-var turned = 0;      // how many leaves are flipped
+var turned = 0;      
 var found = 0;
 var finished = false;
 var built = false;
@@ -260,7 +260,6 @@ function goTo(n) {
   updateBook();
 }
 
-// ----- drag to flip -----
 var drag = null;
 
 book.addEventListener("pointerdown", function (e) {
