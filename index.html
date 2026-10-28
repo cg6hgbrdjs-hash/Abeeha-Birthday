@@ -50,7 +50,6 @@ color: #4f5f2a;
     margin: 5px;
   }
 
-  /* ----- the flipbook ----- */
   #album { display: none; }
   #stage {
     position: absolute;
@@ -161,18 +160,13 @@ color: #4f5f2a;
 </div>
 <script>
 var heartPic = "heart.png";
-
-// Your page images in order. The first is the front cover, the last is the
-// back cover. Use an EVEN number of images. Best size: 1200 x 1600 pixels.
 var pageImgs = [
   "coverpage.jpeg",
   "beah1.jpeg", "beah2.jpeg", "beah3.jpeg", "beah4.jpeg",
-  "page5.jpg", "page6.jpg", "page7.jpg", "page8.jpg",
-  "back.jpg"
+  "beah5.jpeg", "beah6.jpeg", "beah7.jpeg", "beah8.jpeg",
+  "coverpage.jpeg"
 ];
 
-// page = the number in the list above (0 is the cover, 1 is page1.jpg, ...)
-// x and y = position on that page in percent
 var hearts = [
   { page: 1, x: 80, y: 10, text: "Reason 1: change me" },
   { page: 2, x: 8,  y: 60, text: "Reason 2: change me" },
@@ -183,7 +177,6 @@ var hearts = [
 ];
 
 var finalMessage = "CHANGE THIS: your final birthday message. Love, YOUR NAME";
-// ---- END OF EDIT PART ----
 
 var turned = 0;      // how many leaves are flipped
 var found = 0;
@@ -306,7 +299,7 @@ function endDrag() {
 book.addEventListener("pointerup", endDrag);
 book.addEventListener("pointercancel", endDrag);
 
-// ----- hearts -----
+
 function openHeart(el) {
   var i = el.getAttribute("data-i");
   el.classList.add("found");
